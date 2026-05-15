@@ -19,7 +19,7 @@ export default function App() {
 
   // Fungsi untuk ngambil data (dipisah biar bisa dipanggil ulang)
   const fetchJadwal = () => {
-    fetch('https://nadrvi.workers.dev/api/activities')
+    fetch('https://backend.nadrvi.workers.dev/api/activities')
       .then(response => response.json())
       .then(data => setJadwal(data.data || []))
       .catch(err => console.error("Gagal ngambil data:", err));
@@ -41,7 +41,7 @@ export default function App() {
     };
 
     try {
-      const response = await fetch('https://nadrvi.workers.dev/api/activities', {
+      const response = await fetch('https://backend.nadrvi.workers.dev/api/activities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dataBaru)

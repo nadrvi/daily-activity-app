@@ -394,8 +394,7 @@ app.get('/api/activities', async (c) => {
         time_end,
         activity_name,
         activity_date,
-        COALESCE(status, 'plan') AS status,
-        created_at
+        COALESCE(status, 'plan') AS status
       FROM activities
       WHERE user_id = ?
       ORDER BY activity_date DESC, time_start ASC

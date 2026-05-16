@@ -613,7 +613,7 @@ export default function App() {
 
   if (!token || !user) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center px-4 py-10 font-sans relative overflow-hidden">
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center px-4 py-10 font-sans relative overflow-hidden select-none">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.35),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.22),transparent_30%)]" />
 
         <div className="relative w-full max-w-6xl grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-8 items-center">

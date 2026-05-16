@@ -73,7 +73,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 p-10 font-sans text-slate-800">
+    <div className="min-h-screen bg-slate-100 p-10 font-sans text-slate-800 select-none ">
       <div className="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-md">
         <h1 className="text-3xl font-bold text-blue-600 mb-6">
           Daily Noted Activity 📝

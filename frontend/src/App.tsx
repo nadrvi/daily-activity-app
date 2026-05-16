@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
+import { useCallback, useEffect, useState } from "react";
+import type { FormEvent } from "react";
 
-type Status = 'plan' | 'progress' | 'finished';
-type AuthMode = 'login' | 'signup';
+type Status = "plan" | "progress" | "finished";
+type AuthMode = "login" | "signup";
 
 interface Activity {
   id: number;
@@ -28,7 +28,7 @@ interface ApiResponse<T = unknown> {
   data?: T;
 }
 
-const API_BASE = 'https://backend.nadrvi.workers.dev/api';
+const API_BASE = "https://backend.nadrvi.workers.dev/api";
 const ACTIVITY_URL = `${API_BASE}/activities`;
 
 const COLUMNS: {
@@ -39,38 +39,38 @@ const COLUMNS: {
   empty: string;
 }[] = [
   {
-    key: 'plan',
-    title: 'Rencana',
-    emoji: '🗒️',
-    desc: 'Ide atau jadwal yang mau dikerjain.',
-    empty: 'Belum ada rencana.',
+    key: "plan",
+    title: "Rencana",
+    emoji: "🗒️",
+    desc: "Ide atau jadwal yang mau dikerjain.",
+    empty: "Belum ada rencana.",
   },
   {
-    key: 'progress',
-    title: 'On Progress',
-    emoji: '⚡',
-    desc: 'Kegiatan yang lagi berjalan.',
-    empty: 'Belum ada yang dikerjain.',
+    key: "progress",
+    title: "On Progress",
+    emoji: "⚡",
+    desc: "Kegiatan yang lagi berjalan.",
+    empty: "Belum ada yang dikerjain.",
   },
   {
-    key: 'finished',
-    title: 'Finished',
-    emoji: '✅',
-    desc: 'Kegiatan yang sudah selesai.',
-    empty: 'Belum ada yang selesai.',
+    key: "finished",
+    title: "Finished",
+    emoji: "✅",
+    desc: "Kegiatan yang sudah selesai.",
+    empty: "Belum ada yang selesai.",
   },
 ];
 
 function normalizeStatus(status: unknown): Status {
-  if (status === 'plan' || status === 'progress' || status === 'finished') {
+  if (status === "plan" || status === "progress" || status === "finished") {
     return status;
   }
 
-  return 'plan';
+  return "plan";
 }
 
 function getSavedUser(): User | null {
-  const savedUser = localStorage.getItem('daily_activity_user');
+  const savedUser = localStorage.getItem("daily_activity_user");
 
   if (!savedUser) return null;
 
@@ -83,45 +83,47 @@ function getSavedUser(): User | null {
 
 export default function App() {
   const [token, setToken] = useState(() => {
-    return localStorage.getItem('daily_activity_token') || '';
+    return localStorage.getItem("daily_activity_token") || "";
   });
 
   const [user, setUser] = useState<User | null>(() => getSavedUser());
 
-  const [authMode, setAuthMode] = useState<AuthMode>('login');
-  const [authName, setAuthName] = useState('');
-  const [authEmail, setAuthEmail] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
+  const [authMode, setAuthMode] = useState<AuthMode>("login");
+  const [authName, setAuthName] = useState("");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
 
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [filterPeriod, setFilterPeriod] = useState("Semua");
+  const [filterDate, setFilterDate] = useState("");
   const [loadingActivities, setLoadingActivities] = useState(false);
 
-  const [period, setPeriod] = useState('Pagi 🌅');
-  const [activityName, setActivityName] = useState('');
-  const [timeStart, setTimeStart] = useState('');
-  const [timeEnd, setTimeEnd] = useState('');
-  const [activityDate, setActivityDate] = useState('');
+  const [period, setPeriod] = useState("Pagi 🌅");
+  const [activityName, setActivityName] = useState("");
+  const [timeStart, setTimeStart] = useState("");
+  const [timeEnd, setTimeEnd] = useState("");
+  const [activityDate, setActivityDate] = useState("");
 
   const [draggedId, setDraggedId] = useState<number | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
-  const [editPeriod, setEditPeriod] = useState('Pagi 🌅');
-  const [editActivityName, setEditActivityName] = useState('');
-  const [editTimeStart, setEditTimeStart] = useState('');
-  const [editTimeEnd, setEditTimeEnd] = useState('');
-  const [editActivityDate, setEditActivityDate] = useState('');
-  const [editStatus, setEditStatus] = useState<Status>('plan');
+  const [editPeriod, setEditPeriod] = useState("Pagi 🌅");
+  const [editActivityName, setEditActivityName] = useState("");
+  const [editTimeStart, setEditTimeStart] = useState("");
+  const [editTimeEnd, setEditTimeEnd] = useState("");
+  const [editActivityDate, setEditActivityDate] = useState("");
+  const [editStatus, setEditStatus] = useState<Status>("plan");
 
   const logout = useCallback(() => {
-    localStorage.removeItem('daily_activity_token');
-    localStorage.removeItem('daily_activity_user');
+    localStorage.removeItem("daily_activity_token");
+    localStorage.removeItem("daily_activity_user");
 
-    setToken('');
+    setToken("");
     setUser(null);
     setActivities([]);
-    setAuthMode('login');
+    setAuthMode("login");
   }, []);
 
   const fetchActivities = useCallback(async () => {
@@ -137,29 +139,31 @@ export default function App() {
       });
 
       const result = (await response.json()) as ApiResponse<
-        Array<Omit<Activity, 'status'> & { status?: string | null }>
+        Array<Omit<Activity, "status"> & { status?: string | null }>
       >;
 
       if (response.status === 401) {
         logout();
-        alert('Sesi login habis bro, login ulang ya.');
+        alert("Sesi login habis bro, login ulang ya.");
         return;
       }
 
       if (!response.ok || !result.success) {
-        alert(result.message || 'Gagal mengambil data kegiatan');
+        alert(result.message || "Gagal mengambil data kegiatan");
         return;
       }
 
-      const normalizedActivities: Activity[] = (result.data || []).map((item) => ({
-        ...item,
-        status: normalizeStatus(item.status),
-      }));
+      const normalizedActivities: Activity[] = (result.data || []).map(
+        (item) => ({
+          ...item,
+          status: normalizeStatus(item.status),
+        }),
+      );
 
       setActivities(normalizedActivities);
     } catch (error) {
       console.error(error);
-      alert('Gagal konek ke backend bro.');
+      alert("Gagal konek ke backend bro.");
     } finally {
       setLoadingActivities(false);
     }
@@ -178,12 +182,12 @@ export default function App() {
     const name = authName.trim();
 
     if (!email || !password) {
-      alert('Email dan password wajib diisi bro.');
+      alert("Email dan password wajib diisi bro.");
       return;
     }
 
-    if (authMode === 'signup' && !name) {
-      alert('Nama wajib diisi buat signup bro.');
+    if (authMode === "signup" && !name) {
+      alert("Nama wajib diisi buat signup bro.");
       return;
     }
 
@@ -191,36 +195,36 @@ export default function App() {
       setAuthLoading(true);
 
       const response = await fetch(`${API_BASE}/auth/${authMode}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(
-          authMode === 'signup'
+          authMode === "signup"
             ? { name, email, password }
-            : { email, password }
+            : { email, password },
         ),
       });
 
       const result = (await response.json()) as ApiResponse;
 
       if (!response.ok || !result.success || !result.token || !result.user) {
-        alert(result.message || 'Auth gagal bro.');
+        alert(result.message || "Auth gagal bro.");
         return;
       }
 
-      localStorage.setItem('daily_activity_token', result.token);
-      localStorage.setItem('daily_activity_user', JSON.stringify(result.user));
+      localStorage.setItem("daily_activity_token", result.token);
+      localStorage.setItem("daily_activity_user", JSON.stringify(result.user));
 
       setToken(result.token);
       setUser(result.user);
 
-      setAuthName('');
-      setAuthEmail('');
-      setAuthPassword('');
+      setAuthName("");
+      setAuthEmail("");
+      setAuthPassword("");
     } catch (error) {
       console.error(error);
-      alert('Gagal konek ke backend auth bro.');
+      alert("Gagal konek ke backend auth bro.");
     } finally {
       setAuthLoading(false);
     }
@@ -229,8 +233,13 @@ export default function App() {
   const handleAddSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!activityName.trim() || !timeStart.trim() || !timeEnd.trim() || !activityDate) {
-      alert('Isi semua data dulu bro!');
+    if (
+      !activityName.trim() ||
+      !timeStart.trim() ||
+      !timeEnd.trim() ||
+      !activityDate
+    ) {
+      alert("Isi semua data dulu bro!");
       return;
     }
 
@@ -240,14 +249,14 @@ export default function App() {
       time_end: timeEnd,
       activity_name: activityName,
       activity_date: activityDate,
-      status: 'plan' as Status,
+      status: "plan" as Status,
     };
 
     try {
       const response = await fetch(ACTIVITY_URL, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
@@ -257,24 +266,24 @@ export default function App() {
 
       if (response.status === 401) {
         logout();
-        alert('Sesi login habis bro, login ulang ya.');
+        alert("Sesi login habis bro, login ulang ya.");
         return;
       }
 
       if (!response.ok || !result.success) {
-        alert(result.message || 'Gagal menambah jadwal');
+        alert(result.message || "Gagal menambah jadwal");
         return;
       }
 
-      setActivityName('');
-      setTimeStart('');
-      setTimeEnd('');
-      setActivityDate('');
+      setActivityName("");
+      setTimeStart("");
+      setTimeEnd("");
+      setActivityDate("");
 
       fetchActivities();
     } catch (error) {
       console.error(error);
-      alert('Gagal konek ke backend bro.');
+      alert("Gagal konek ke backend bro.");
     }
   };
 
@@ -290,15 +299,15 @@ export default function App() {
 
     setActivities((prev) =>
       prev.map((activity) =>
-        activity.id === id ? { ...activity, status: newStatus } : activity
-      )
+        activity.id === id ? { ...activity, status: newStatus } : activity,
+      ),
     );
 
     try {
       const response = await fetch(`${ACTIVITY_URL}/${id}/status`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ status: newStatus }),
@@ -308,18 +317,18 @@ export default function App() {
 
       if (response.status === 401) {
         logout();
-        alert('Sesi login habis bro, login ulang ya.');
+        alert("Sesi login habis bro, login ulang ya.");
         return;
       }
 
       if (!response.ok || !result.success) {
         setActivities(previousActivities);
-        alert(result.message || 'Gagal memindahkan card');
+        alert(result.message || "Gagal memindahkan card");
       }
     } catch (error) {
       console.error(error);
       setActivities(previousActivities);
-      alert('Gagal konek ke backend bro.');
+      alert("Gagal konek ke backend bro.");
     } finally {
       setDraggedId(null);
     }
@@ -352,7 +361,7 @@ export default function App() {
       !editTimeEnd.trim() ||
       !editActivityDate
     ) {
-      alert('Data edit nggak boleh kosong bro!');
+      alert("Data edit nggak boleh kosong bro!");
       return;
     }
 
@@ -367,9 +376,9 @@ export default function App() {
 
     try {
       const response = await fetch(`${ACTIVITY_URL}/${editId}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
@@ -379,12 +388,12 @@ export default function App() {
 
       if (response.status === 401) {
         logout();
-        alert('Sesi login habis bro, login ulang ya.');
+        alert("Sesi login habis bro, login ulang ya.");
         return;
       }
 
       if (!response.ok || !result.success) {
-        alert(result.message || 'Gagal update jadwal');
+        alert(result.message || "Gagal update jadwal");
         return;
       }
 
@@ -392,16 +401,16 @@ export default function App() {
       fetchActivities();
     } catch (error) {
       console.error(error);
-      alert('Gagal konek ke backend bro.');
+      alert("Gagal konek ke backend bro.");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Yakin mau hapus card ini bro?')) return;
+    if (!confirm("Yakin mau hapus card ini bro?")) return;
 
     try {
       const response = await fetch(`${ACTIVITY_URL}/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -411,21 +420,43 @@ export default function App() {
 
       if (response.status === 401) {
         logout();
-        alert('Sesi login habis bro, login ulang ya.');
+        alert("Sesi login habis bro, login ulang ya.");
         return;
       }
 
       if (!response.ok || !result.success) {
-        alert(result.message || 'Gagal hapus jadwal');
+        alert(result.message || "Gagal hapus jadwal");
         return;
       }
 
       setActivities((prev) => prev.filter((activity) => activity.id !== id));
     } catch (error) {
       console.error(error);
-      alert('Gagal konek ke backend bro.');
+      alert("Gagal konek ke backend bro.");
     }
   };
+
+  const filteredActivities = activities.filter((activity) => {
+    const matchPeriod =
+      filterPeriod === "Semua" || activity.period === filterPeriod;
+
+    const matchDate = !filterDate || activity.activity_date === filterDate;
+
+    return matchPeriod && matchDate;
+  });
+
+  const totalActivities = filteredActivities.length;
+  const totalPlan = filteredActivities.filter(
+    (activity) => activity.status === "plan",
+  ).length;
+  const totalProgress = filteredActivities.filter(
+    (activity) => activity.status === "progress",
+  ).length;
+  const totalFinished = filteredActivities.filter(
+    (activity) => activity.status === "finished",
+  ).length;
+  const isFilterActive = filterPeriod !== "Semua" || Boolean(filterDate);
+
 
   if (!token || !user) {
     return (
@@ -444,11 +475,11 @@ export default function App() {
           <div className="grid grid-cols-2 bg-slate-100 rounded-2xl p-1 mb-6">
             <button
               type="button"
-              onClick={() => setAuthMode('login')}
+              onClick={() => setAuthMode("login")}
               className={`py-2 rounded-xl font-semibold transition ${
-                authMode === 'login'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-slate-500'
+                authMode === "login"
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-slate-500"
               }`}
             >
               Login
@@ -456,11 +487,11 @@ export default function App() {
 
             <button
               type="button"
-              onClick={() => setAuthMode('signup')}
+              onClick={() => setAuthMode("signup")}
               className={`py-2 rounded-xl font-semibold transition ${
-                authMode === 'signup'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-slate-500'
+                authMode === "signup"
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-slate-500"
               }`}
             >
               Sign Up
@@ -468,11 +499,9 @@ export default function App() {
           </div>
 
           <form onSubmit={handleAuthSubmit} className="space-y-4">
-            {authMode === 'signup' && (
+            {authMode === "signup" && (
               <div>
-                <label className="block text-sm font-semibold mb-1">
-                  Nama
-                </label>
+                <label className="block text-sm font-semibold mb-1">Nama</label>
                 <input
                   type="text"
                   value={authName}
@@ -484,9 +513,7 @@ export default function App() {
             )}
 
             <div>
-              <label className="block text-sm font-semibold mb-1">
-                Email
-              </label>
+              <label className="block text-sm font-semibold mb-1">Email</label>
               <input
                 type="email"
                 value={authEmail}
@@ -515,10 +542,10 @@ export default function App() {
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-bold py-3 px-4 rounded-xl transition shadow-md"
             >
               {authLoading
-                ? 'Loading...'
-                : authMode === 'login'
-                  ? 'Login'
-                  : 'Buat Akun'}
+                ? "Loading..."
+                : authMode === "login"
+                  ? "Login"
+                  : "Buat Akun"}
             </button>
           </form>
         </div>
@@ -554,6 +581,103 @@ export default function App() {
             </button>
           </div>
         </header>
+
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5">
+            <p className="text-sm text-slate-500 font-semibold">
+              Total Kegiatan
+            </p>
+            <h3 className="text-3xl font-bold text-slate-900 mt-2">
+              {totalActivities}
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Berdasarkan filter aktif
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5">
+            <p className="text-sm text-slate-500 font-semibold">Rencana</p>
+            <h3 className="text-3xl font-bold text-blue-600 mt-2">
+              {totalPlan}
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Card yang belum dimulai
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5">
+            <p className="text-sm text-slate-500 font-semibold">
+              On Progress
+            </p>
+            <h3 className="text-3xl font-bold text-orange-500 mt-2">
+              {totalProgress}
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Card yang sedang dikerjakan
+            </p>
+          </div>
+
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5">
+            <p className="text-sm text-slate-500 font-semibold">Finished</p>
+            <h3 className="text-3xl font-bold text-green-600 mt-2">
+              {totalFinished}
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">
+              Card yang sudah selesai
+            </p>
+          </div>
+        </section>
+
+        <section className="bg-white rounded-3xl shadow-sm border border-slate-200 p-5 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-end gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <label className="block text-sm font-semibold">
+                  Filter Periode
+                </label>
+                {isFilterActive && (
+                  <span className="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full">
+                    Filter aktif
+                  </span>
+                )}
+              </div>
+              <select
+                value={filterPeriod}
+                onChange={(e) => setFilterPeriod(e.target.value)}
+                className="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option>Semua</option>
+                <option>Pagi 🌅</option>
+                <option>Siang ☀️</option>
+                <option>Sore 🌆</option>
+                <option>Malam 🌌</option>
+              </select>
+            </div>
+
+            <div className="flex-1">
+              <label className="block text-sm font-semibold mb-1">
+                Filter Tanggal
+              </label>
+              <input
+                type="date"
+                value={filterDate}
+                onChange={(e) => setFilterDate(e.target.value)}
+                className="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setFilterPeriod("Semua");
+                setFilterDate("");
+              }}
+              className="bg-slate-900 hover:bg-slate-700 text-white font-bold px-5 py-3 rounded-xl transition"
+            >
+              Reset Filter
+            </button>
+          </div>
+        </section>
 
         <form
           onSubmit={handleAddSubmit}
@@ -607,9 +731,7 @@ export default function App() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-1">
-                Mulai
-              </label>
+              <label className="block text-sm font-semibold mb-1">Mulai</label>
               <input
                 type="text"
                 placeholder="09.00"
@@ -647,21 +769,28 @@ export default function App() {
           </div>
         </form>
 
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold">Board Kegiatan</h2>
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-bold">Board Kegiatan</h2>
+            <p className="text-sm text-slate-500">
+              {isFilterActive
+                ? "Data yang tampil sedang mengikuti filter."
+                : "Semua kegiatan ditampilkan."}
+            </p>
+          </div>
           <button
             type="button"
             onClick={fetchActivities}
             className="text-sm bg-white hover:bg-slate-50 border border-slate-300 px-4 py-2 rounded-xl font-semibold transition"
           >
-            {loadingActivities ? 'Loading...' : 'Refresh'}
+            {loadingActivities ? "Loading..." : "Refresh"}
           </button>
         </div>
 
         <main className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {COLUMNS.map((column) => {
-            const cards = activities.filter(
-              (activity) => activity.status === column.key
+            const cards = filteredActivities.filter(
+              (activity) => activity.status === column.key,
             );
 
             return (
@@ -680,9 +809,7 @@ export default function App() {
                         {cards.length}
                       </span>
                     </h3>
-                    <p className="text-sm text-slate-500 mt-1">
-                      {column.desc}
-                    </p>
+                    <p className="text-sm text-slate-500 mt-1">{column.desc}</p>
                   </div>
                 </div>
 
@@ -739,7 +866,7 @@ export default function App() {
                           </span>
 
                           <span className="text-xs bg-emerald-100 text-emerald-700 font-bold px-2 py-1 rounded-full">
-                            📅 {activity.activity_date || 'No Date'}
+                            📅 {activity.activity_date || "No Date"}
                           </span>
 
                           <span className="text-xs bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded-full">
@@ -748,21 +875,23 @@ export default function App() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 mt-4">
-                          {column.key !== 'plan' && (
+                          {column.key !== "plan" && (
                             <button
                               type="button"
-                              onClick={() => handleMoveStatus(activity.id, 'plan')}
+                              onClick={() =>
+                                handleMoveStatus(activity.id, "plan")
+                              }
                               className="text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 rounded-xl transition"
                             >
                               Ke Rencana
                             </button>
                           )}
 
-                          {column.key !== 'progress' && (
+                          {column.key !== "progress" && (
                             <button
                               type="button"
                               onClick={() =>
-                                handleMoveStatus(activity.id, 'progress')
+                                handleMoveStatus(activity.id, "progress")
                               }
                               className="text-xs bg-orange-100 hover:bg-orange-200 text-orange-700 font-bold py-2 rounded-xl transition"
                             >
@@ -770,11 +899,11 @@ export default function App() {
                             </button>
                           )}
 
-                          {column.key !== 'finished' && (
+                          {column.key !== "finished" && (
                             <button
                               type="button"
                               onClick={() =>
-                                handleMoveStatus(activity.id, 'finished')
+                                handleMoveStatus(activity.id, "finished")
                               }
                               className="text-xs bg-green-100 hover:bg-green-200 text-green-700 font-bold py-2 rounded-xl transition"
                             >
